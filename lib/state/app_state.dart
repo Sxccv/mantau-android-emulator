@@ -42,6 +42,13 @@ class AppState extends ChangeNotifier {
   bool soundEnabled = true;
   bool autoRecordEnabled = true;
 
+  /// Id kejadian yang harus langsung dibuka begitu MainShell terpasang.
+  ///
+  /// Diisi saat notifikasi sistem diketuk (deep link demo). MainShell
+  /// mendengarkan notifier ini dan memanggil `openRecording` begitu nilai
+  /// terisi — satu mekanisme untuk cold start maupun warm tap.
+  final ValueNotifier<String?> deepLinkEventId = ValueNotifier<String?>(null);
+
   UserProfile get user => _user;
   List<Camera> get cameras => List.unmodifiable(_cameras);
   List<EmergencyContact> get contacts => List.unmodifiable(_contacts);
@@ -268,5 +275,27 @@ class AppState extends ChangeNotifier {
     if (sound != null) soundEnabled = sound;
     if (autoRecord != null) autoRecordEnabled = autoRecord;
     notifyListeners();
+  }
+
+  // --- Deep link notifikasi (demo) ---------------------------------------
+
+  /// Memasuki demo langsung dari notifikasi sistem: melewati login dan
+  /// onboarding lalu membuka kejadian [eventId] begitu shell siap.
+  ///
+  /// Dipanggil saat notifikasi diketuk, baik proses aplikasi baru dihidupkan
+  /// oleh ketukan itu (cold start) maupun sudah berjalan (warm tap). Ini
+  /// sengaja mengabaikan gerbang login/onboarding supaya ketukan mendarat
+  /// tepat di halaman rekaman — sesuai kebutuhan demo.
+  void bypassToEvent(String eventId) {
+    _loggedIn = true;
+    _onboarded = true;
+    deepLinkEventId.value = eventId;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    deepLinkEventId.dispose();
+    super.dispose();
   }
 }

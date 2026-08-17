@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Ikon kecil notifikasi: segitiga peringatan putih dengan tanda seru.
+         Android hanya memakai kanal alfa, jadi bagian seru dibuat transparan
+         agar "terpotong" dari segitiga. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,2 L1,21 h22 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M13,17 h-2 v-2 h2 z M13,13 h-2 L11,8 h2 z" />
+</vector>

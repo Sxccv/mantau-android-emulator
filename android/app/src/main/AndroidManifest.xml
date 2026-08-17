@@ -1,5 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13+ (API 33+): izin runtime wajib agar notifikasi bisa tampil.
+         Izin diminta aplikasi saat pertama dijalankan, atau diizinkan dulu
+         lewat adb — lihat README bagian "Demo notifikasi layar kunci". -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <application
         android:label="Mantau"
         android:name="${applicationName}"

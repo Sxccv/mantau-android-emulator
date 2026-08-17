@@ -36,13 +36,16 @@ class _RecordingDetailScreenState extends State<RecordingDetailScreen> {
     _controller = controller;
 
     try {
-      // Batas waktu penting: bila pipeline media peramban bermasalah,
-      // initialize() bisa menggantung selamanya dan pengguna hanya melihat
-      // kotak hitam tanpa penjelasan. Lebih baik gagal dengan jujur.
+      // Batas waktu penting: bila pipeline media bermasalah, initialize()
+      // bisa menggantung selamanya dan pengguna hanya melihat kotak hitam
+      // tanpa penjelasan. Lebih baik gagal dengan jujur.
       //
-      // 4 detik: klip yang sehat siap jauh di bawah itu, sementara batas yang
-      // lebih panjang berarti layar terpenting demo diam berputar terlalu lama.
-      await controller.initialize().timeout(const Duration(seconds: 4));
+      // 10 detik: klip yang sehat siap jauh di bawah itu, sementara batas
+      // yang lebih panjang berarti layar terpenting demo diam berputar
+      // terlalu lama. Sengaja lebih longgar dari dulu (4 dtk) karena
+      // ketukan notifikasi bisa menghidupkan aplikasi dari dingin — di
+      // emulator, peluncuran dingin yang lambat gampang melewati 4 detik.
+      await controller.initialize().timeout(const Duration(seconds: 10));
       controller.addListener(_onTick);
       if (!mounted) return;
       setState(() => _ready = true);

@@ -257,6 +257,72 @@ tampilan saja.
 
 ---
 
+## Demo notifikasi layar kunci
+
+Aplikasi mengirim **notifikasi sistem sungguhan** beberapa detik setelah
+dibuka — ditangani `lib/services/notification_service.dart` memakai
+`flutter_local_notifications`. Notifikasi tampil di laci maupun layar kunci
+emulator, dan mengetuknya membuka aplikasi **langsung ke halaman rekaman**
+kejadian yang belum ditinjau (`ev-1`), lengkap dengan video, rentang waktu,
+dan kontak darurat. Login dan onboarding **sengaja dilewati** demi kelancaran
+demo (lihat `AppState.bypassToEvent`).
+
+### Cara menjalankan (dari nol)
+
+1. **Bangun APK debug** — cukup sekali; ulangi bila kode berubah:
+
+   ```bash
+   flutter build apk --debug
+   ```
+
+2. **Jalankan skrip demo** — menyalakan emulator (bila `--launch`), menunggu
+   selesai boot, memasang APK, mengizinkan notifikasi lewat adb, lalu membuka
+   aplikasi:
+
+   ```bash
+   bash scripts/demo_notification.sh --launch
+   ```
+
+   (Tanpa `--launch`, skrip memakai emulator yang sudah menyala.)
+
+3. **Kunci layar** emulator (tombol daya di panel samping) — notifikasi
+   **"Kemungkinan jatuh terdeteksi"** sudah menunggu di layar kunci.
+
+4. **Ketuk notifikasi** → aplikasi terbuka langsung di halaman rekaman
+   kejadian (video berjalan, kontak darurat terlihat). Tanpa login, tanpa
+   onboarding.
+
+Notifikasi dikirim ulang setiap kali aplikasi dibuka dengan id tetap, jadi
+notifikasi lama diganti — tidak menumpuk di laci. Aplikasi perlu dijalankan
+sekali dulu sebelum notifikasi bisa ada (langkah 2 di atas melakukannya).
+
+### Cara manual (tanpa skrip)
+
+Bila skrip tidak bisa dipakai — mis. adb tidak ditemukan dan pesan di
+terminal menyuruh mengisi `ADB` atau `ANDROID_SDK_ROOT` — jalankan langkahnya
+satu per satu:
+
+```bash
+flutter build apk --debug
+flutter emulators --launch Medium_Phone_API_36.1   # bila emulator belum nyala
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+adb shell pm grant id.mantau.demo android.permission.POST_NOTIFICATIONS
+adb shell am start -n id.mantau.demo/.MainActivity
+```
+
+`adb` sering tidak otomatis masuk PATH; lokasinya:
+`%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe`.
+
+### Catatan
+
+- Saat **pertama kali** aplikasi dibuka, sistem menampilkan dialog izin
+  notifikasi — tekan **Izinkan**. Perintah `pm grant` di atas (atau skrip)
+  mengizinkan lebih dulu, sehingga dialog tidak muncul sama sekali.
+- Ketukan dari layar kunci maupun laci memakai jalur yang sama, termasuk saat
+  aplikasi dihidupkan dari dingin oleh ketukan itu sendiri.
+
+---
+
 ## Urutan peragaan yang disarankan
 
 1. **Masuk** — biarkan kolom terisi, tekan `Masuk`.
@@ -315,9 +381,11 @@ aplikasinya sudah dipastikan sehat, jadi penyebabnya ada pada proses media
 Chrome di lingkungan tersebut. Di Android tidak ada masalah itu: pemutarannya
 ditangani `video_player_android` secara native.
 
-Pemutar tetap diberi batas waktu 4 detik beserta pesan yang jelas, supaya
+Pemutar tetap diberi batas waktu 10 detik beserta pesan yang jelas, supaya
 seandainya inisialisasi gagal di perangkat lain, demo tidak menggantung pada
-kotak hitam tanpa penjelasan.
+kotak hitam tanpa penjelasan. Batas ini sengaja lebih longgar dari 4 detik
+karena ketukan notifikasi dapat menghidupkan aplikasi dari dingin, dan
+peluncuran dingin yang lambat di emulator bisa melewati 4 detik.
 
 ---
 
@@ -332,6 +400,7 @@ lib/
   models/models.dart     Camera, FallEvent, EmergencyContact, UserProfile, dll
   data/demo_data.dart    seluruh data dummy terkumpul di satu tempat
   utils/formatters.dart  format rupiah, tanggal, dan durasi berbahasa Indonesia
+  services/              notifikasi sistem demo (flutter_local_notifications)
   widgets/               komponen bersama + PhoneFrame untuk tampilan web
   features/
     auth/                1.1 masuk

@@ -34,6 +34,39 @@ class MainShellState extends State<MainShell> {
 
   final _navKeys = List.generate(4, (_) => GlobalKey<NavigatorState>());
 
+  late final ValueNotifier<String?> _deepLink;
+
+  @override
+  void initState() {
+    super.initState();
+    _deepLink = context.read<AppState>().deepLinkEventId;
+    _deepLink.addListener(_onDeepLink);
+
+    // Cold start dari ketukan notifikasi: nilai sudah terisi sebelum shell
+    // dipasang, jadi periksa nilai saat ini juga — listener hanya menangkap
+    // perubahan yang terjadi setelah ini terpasang.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pending = _deepLink.value;
+      if (pending == null) return;
+      _deepLink.value = null;
+      openRecording(pending);
+    });
+  }
+
+  @override
+  void dispose() {
+    _deepLink.removeListener(_onDeepLink);
+    super.dispose();
+  }
+
+  /// Ketukan notifikasi saat aplikasi sudah berjalan (warm tap).
+  void _onDeepLink() {
+    final pending = _deepLink.value;
+    if (pending == null) return;
+    _deepLink.value = null;
+    openRecording(pending);
+  }
+
   void goToTab(int index) {
     if (_index == index) {
       // Mengetuk tab yang sedang aktif akan kembali ke akar tab tersebut.
